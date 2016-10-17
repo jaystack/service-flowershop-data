@@ -1,0 +1,16 @@
+{
+  "globalDependencies": {
+    "config": "registry:dt/config#0.0.0+20160317120654",
+    "express": "registry:dt/express#4.0.0+20160708185218",
+    "express-serve-static-core": "registry:dt/express-serve-static-core#4.0.0+20161008174359",
+    "mime": "registry:dt/mime#0.0.0+20160316155526",
+    "mongodb": "registry:dt/mongodb#2.1.0+20160602142941",
+    "mongoose": "registry:dt/mongoose#4.5.9+20161010180758",
+    "morgan": "registry:dt/morgan#1.7.0+20160524142355",
+    "node-4": "registry:dt/node-4#4.0.0+20161010101523",
+    "serve-static": "registry:dt/serve-static#0.0.0+20160606155157"
+  },
+  "dependencies": {
+    "body-parser": "registry:npm/body-parser#1.15.2+20160815132839"
+  }
+}
