@@ -65,17 +65,6 @@ app.post('/data/order', (req, res) => {
   })
 })
 
-//TODO delete this
-app.use('/data/set', (req, res, next) => {
-  let flower = new flowers({ Name: 'Virag1', ImageUrl: 'https://static.pexels.com/photos/27714/pexels-photo-27714.jpg', Price: (Math.random() * 10).toFixed(2) })
-  let order = new orders({ CustomerName: 'test', CustomerAddress: 'test', Orders: [flower], OrderPrice: flower['Price'] })
-  flower.save((err, result) => {
-    if (err) res.sendStatus(500)
-    res.sendStatus(201)
-  })
-  order.save()
-})
-
 app.listen(3003, () => {
   console.log('app listen on port 3003')
 })

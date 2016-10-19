@@ -6,9 +6,8 @@
   "scripts": {
     "start": "node server.js",
     "typings": "node_modules/.bin/typings install",
-    "tsc": "node_modules/.bin/tsc",
-    "tsc:w": "node_modules/.bin/tsc -w",
-    "build": "npm run typings && npm run tsc"
+    "build": "node_modules/.bin/tsc",
+    "build:w": "node_modules/.bin/tsc -w"
   },
   "author": "",
   "license": "ISC",

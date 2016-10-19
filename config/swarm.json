@@ -1,3 +1,5 @@
 {
-  "dataApi": "http://data:3003"
+  "mongodb":{
+    "uri":"mongodb://ec2-52-212-84-44.eu-west-1.compute.amazonaws.com:27017,ec2-52-211-122-143.eu-west-1.compute.amazonaws.com:27017/flowershop?replicaSet=flowershop"
+  }
 }
