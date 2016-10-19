@@ -9,7 +9,7 @@ RUN npm run typings
 
 ADD . .
 
-RUN npm run tsc
+RUN npm run build
 
 EXPOSE 9000 
 
