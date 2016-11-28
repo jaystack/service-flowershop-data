@@ -7,6 +7,7 @@
     "start": "node server.js",
     "build": "node_modules/.bin/tsc",
     "build:w": "node_modules/.bin/tsc -w",
+    "init": "npm run build && node lib/src/initFlowerShop.js",
     "test": "node_modules/.bin/mocha ./lib/test/*.js",
     "test_jenkins": "node_modules/.bin/mocha --reporter mocha-junit-reporter ./lib/test/*.js"
   },
