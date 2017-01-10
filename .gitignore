@@ -3,3 +3,4 @@ typings
 lib
 test-results.xml
 test/*.js
+system-endpoints.json
