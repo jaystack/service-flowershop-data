@@ -4,9 +4,10 @@ import * as logger from 'morgan'
 import * as mongoose from 'mongoose'
 import { flowerSchema, orderSchema, categorySchema } from './flowershopSchemas'
 import * as bodyParser from 'body-parser'
+import { getServiceAddress } from 'system-endpoints'
 
 //init database
-mongoose.connect(config.get<string>('mongodb.uri'))
+mongoose.connect(getServiceAddress('mongodb://localhost/flowershop'))
 const db = mongoose.connection;
 const flowers = mongoose.model('flowers', flowerSchema)
 const categories = mongoose.model('categories', categorySchema)

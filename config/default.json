@@ -1,5 +1,6 @@
 {
-  "mongodb":{
-    "uri":"mongodb://localhost/flowershop"
-  }
+  "mongodb": {
+    "uri": "mongodb://localhost/flowershop"
+  },
+  "systemEndpoints": "./system-endpoints.json"
 }
