@@ -5,6 +5,16 @@ import * as mongoose from 'mongoose'
 import { flowerSchema, orderSchema, categorySchema } from './flowershopSchemas'
 import * as bodyParser from 'body-parser'
 import { getServiceEndPoint } from 'system-endpoints'
+import * as rascal from 'rascal'
+
+const rascalConfig = require('../../config/rascalConfig');
+rascal.withDefaultConfig(rascalConfig.rascal);
+let broker;
+rascal.createBroker({}, {}, (err: Error, _broker: any) => {
+  if (err)
+    return console.log("ERROR in createBroker");
+  broker = _broker;
+});
 
 setTimeout(function () {
 
@@ -58,7 +68,7 @@ setTimeout(function () {
     let oIds = JSON.parse(req.body.flowers).map(i => new mongoose.Schema.Types.ObjectId(i))
     console.log('oids: ', oIds, JSON.parse(req.body.flowers))
     flowers.find({ _id: { $in: JSON.parse(req.body.flowers) } }, (err, flowers) => {
-      let order = new orders({
+      const order = new orders({
         CustomerName: req.body.customerName,
         CustomerAddress: req.body.customerAddress,
         Orders: flowers,
@@ -66,7 +76,12 @@ setTimeout(function () {
       })
       order.save((err, o) => {
         if (err) res.sendStatus(500)
-        res.sendStatus(201)
+        publish(rascalConfig.queuename, order)
+          .then(() => res.sendStatus(201))
+          .catch((err) => {
+            console.log(err);
+            res.sendStatus(500);
+          });
       })
     })
   })
@@ -76,4 +91,44 @@ setTimeout(function () {
   })
 
 }, 1000);
+
+/*function subscribe(queueName:string): Promise<void> {
+	return new Promise<void>((resolve: Function, reject: Function) => {
+		broker.subscribe(queueName, (err: Error, subscription: any) => {
+			if (err) {
+        console.log("ERROR in subscribe");
+				return reject(err);
+			}
+
+			subscription.on(
+				"message",
+				(msg: any, content: any, ackOrNack: Function) => messageHandler(deps, msg, content, ackOrNack, queueName)
+			);
+
+			resolve();
+		});
+	});
+}*/
+
+function publish(queueName: string, message: any): Promise<void> {
+  return new Promise<void>((resolve: Function, reject: Function) => {
+    broker.publish(queueName, JSON.stringify(message), (err: Error, publication: any) => {
+      if (err) {
+        console.log("ERROR in publish");
+        return reject(err);
+      }
+
+      publication
+        .on("success", (messageId: string) => {
+          console.log("Successful publication");
+          return resolve();
+        })
+        .on("error", (err: Error) => {
+          console.log("ERROR in publication");
+          return reject(err);
+        });
+    });
+  });
+}
+
 export default {}
