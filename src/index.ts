@@ -7,16 +7,26 @@ import * as bodyParser from 'body-parser'
 import { getServiceEndPoint } from 'system-endpoints'
 import * as rascal from 'rascal'
 
-const rascalConfig = require('../../config/rascalConfig');
-rascal.withDefaultConfig(rascalConfig.rascal);
-let broker;
-rascal.createBroker({}, {}, (err: Error, _broker: any) => {
-  if (err)
-    return console.log("ERROR in createBroker");
-  broker = _broker;
-});
+function promisifyCreateBroker(rascal: any, rascalConfig: any) {
+  return new Promise((resolve, reject) => {
+    return rascal.createBroker(rascalConfig, {}, (err: Error, broker: any) => {
+      console.log("+++++++++++++++++++++++++++++++++++++++++++++++++++");
+      if (err) {
+        console.log("ERROR in createBroker: " + err);
+        return reject(err);
+      }
 
-setTimeout(function () {
+      console.log("%%%%%%%%%%%%%%%%%%%%%%%%");
+      return resolve(broker);
+    });
+  });
+}
+
+setTimeout(async function () {
+
+  const broker = await promisifyCreateBroker(rascal, rascal.withDefaultConfig(config.rascal));
+  console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
+  console.log(broker);
 
   //init database
   const endpoint = getServiceEndPoint('localhost:27017') || { host: "localhost", port: 27017 }
@@ -76,7 +86,7 @@ setTimeout(function () {
       })
       order.save((err, o) => {
         if (err) res.sendStatus(500)
-        publish(rascalConfig.queuename, order)
+        publish(broker, config.rascal.queuename, order)
           .then(() => res.sendStatus(201))
           .catch((err) => {
             console.log(err);
@@ -110,8 +120,9 @@ setTimeout(function () {
 	});
 }*/
 
-function publish(queueName: string, message: any): Promise<void> {
+function publish(broker: any, queueName: string, message: any): Promise<void> {
   return new Promise<void>((resolve: Function, reject: Function) => {
+    console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
     broker.publish(queueName, JSON.stringify(message), (err: Error, publication: any) => {
       if (err) {
         console.log("ERROR in publish");
