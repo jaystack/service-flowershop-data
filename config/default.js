@@ -20,8 +20,6 @@ module.exports = {
             "heartbeat": 5
           }
         },
-        "exchanges": [
-        ],
         "queues": {
           "sendEmailMQ": {
             "options": {
@@ -32,8 +30,6 @@ module.exports = {
             }
           }
         },
-        "bindings": [
-        ],
         "subscriptions": {
           "sendEmailMQ": {
             "queue": "sendEmailMQ"
