@@ -55,7 +55,6 @@ setTimeout(async function() {
         })
     })
 
-
     app.get('/data/flowers', (req, res, next) => {
         flowers.find((err, docs) => {
             if (err) return res.sendStatus(500)
@@ -77,6 +76,7 @@ setTimeout(async function() {
             const order = new orders({
                 CustomerName: req.body.customerName,
                 CustomerAddress: req.body.customerAddress,
+                EmailAddress: req.body.emailAddress,
                 Orders: flowers,
                 OrderPrice: (flowers.reduce((a, b) => a + b['Price'], 0)).toFixed(2)
             })
@@ -97,24 +97,6 @@ setTimeout(async function() {
     })
 
 }, 1000);
-
-/*function subscribe(queueName:string): Promise<void> {
-	return new Promise<void>((resolve: Function, reject: Function) => {
-		broker.subscribe(queueName, (err: Error, subscription: any) => {
-			if (err) {
-        console.log("ERROR in subscribe");
-				return reject(err);
-			}
-
-			subscription.on(
-				"message",
-				(msg: any, content: any, ackOrNack: Function) => messageHandler(deps, msg, content, ackOrNack, queueName)
-			);
-
-			resolve();
-		});
-	});
-}*/
 
 function publish(broker: any, queueName: string, message: any): Promise<void> {
     return new Promise<void>((resolve: Function, reject: Function) => {

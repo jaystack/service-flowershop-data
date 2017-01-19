@@ -30,11 +30,6 @@ module.exports = {
             }
           }
         },
-        "subscriptions": {
-          "sendEmailMQ": {
-            "queue": "sendEmailMQ"
-          }
-        },
         "publications": {
           "sendEmailMQ": {
             "queue": "sendEmailMQ"

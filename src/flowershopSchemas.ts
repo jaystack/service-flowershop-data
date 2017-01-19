@@ -16,5 +16,6 @@ export const orderSchema = new mongoose.Schema({
     CustomerName: String,
     CustomerAddress: String,
     Orders: [flowerSchema],
-    OrderPrice: Number
+    OrderPrice: Number,
+    EmailAddress: String
 })
