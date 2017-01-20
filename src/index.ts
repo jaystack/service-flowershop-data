@@ -83,6 +83,7 @@ setTimeout(async function() {
             order.save((err, o) => {
                 if (err) res.sendStatus(500)
                 publish(broker, <string>config.get('queuename'), order)
+                    .then(() => publish(broker, <string>config.get('loggerQueueName'), getLogObject(getLogMessage(order))))
                     .then(() => res.sendStatus(201))
                     .catch((err) => {
                         console.log(err);
@@ -97,6 +98,18 @@ setTimeout(async function() {
     })
 
 }, 1000);
+
+function getLogMessage(order: any): string {
+    return `Successful order!
+Ordered items: ${order.Orders.map(item => item.Name).join(', ')}`;
+}
+
+function getLogObject(message: string, logLevel: string = 'warning') {
+    return {
+        message,
+        logLevel
+    }
+}
 
 function publish(broker: any, queueName: string, message: any): Promise<void> {
     return new Promise<void>((resolve: Function, reject: Function) => {

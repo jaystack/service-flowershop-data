@@ -28,16 +28,28 @@ module.exports = {
                 "x-max-length": 5000
               }
             }
+          },
+          "loggerMQ": {
+            "options": {
+              "arguments": {
+                "x-message-ttl": 60000,
+                "x-max-length": 5000
+              }
+            }
           }
         },
         "publications": {
           "sendEmailMQ": {
             "queue": "sendEmailMQ"
+          },
+          "loggerMQ": {
+            "queue": "loggerMQ"
           }
         }
       }
     }
   },
   "defer": 1000,
-  "queuename": "sendEmailMQ"
+  "queuename": "sendEmailMQ",
+  "loggerQueueName": "loggerMQ"
 }
