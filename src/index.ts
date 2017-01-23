@@ -111,7 +111,7 @@ function getLogMessage(order: any): string {
 Ordered items: ${order.Orders.map(item => item.Name).join(', ')}`;
 }
 
-function getLogObject(message: string, logLevel: string = 'warning') {
+function getLogObject(message: string, logLevel: string = 'info') {
     return {
         message,
         logLevel
