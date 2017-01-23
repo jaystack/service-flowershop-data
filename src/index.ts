@@ -69,6 +69,13 @@ setTimeout(async function() {
         })
     })
 
+    app.get('/registration', (req, res, next) => {
+        categories.find((err, result) => {
+            if (err) return res.sendStatus(500)
+            res.json(result)
+        })
+    })
+
     app.post('/data/order', (req, res) => {
         let oIds = JSON.parse(req.body.flowers).map(i => new mongoose.Schema.Types.ObjectId(i))
         console.log('oids: ', oIds, JSON.parse(req.body.flowers))
