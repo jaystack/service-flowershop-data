@@ -4,7 +4,8 @@ import * as logger from 'morgan'
 import * as mongoose from 'mongoose'
 import { flowerSchema, orderSchema, categorySchema } from './flowershopSchemas'
 import * as bodyParser from 'body-parser'
-import { getServiceEndPoint } from 'system-endpoints'
+import { getServiceAddress } from 'system-endpoints'
+import { stringify } from 'querystring'
 import * as rascal from 'rascal'
 
 function promisifyCreateBroker(rascal: any, rascalConfig: any) {
@@ -20,15 +21,39 @@ function promisifyCreateBroker(rascal: any, rascalConfig: any) {
     });
 }
 
+function createRascalConnectionString({user, password, vhost, hostname, port, options}, endpointAddress: string) {
+  const address = endpointAddress || `${hostname}:${port}`;
+  const optionString = stringify(options);
+  return `amqp://${user}:${password}@${address}/${vhost}?${optionString}`
+}
+
+async function createBroker(rascalConfig) {
+  const endpointAddress = getServiceAddress('localhost:5672');
+  const connection = createRascalConnectionString(rascalConfig.vhosts.flowershop.connection, endpointAddress);
+  const config = { vhosts: { flowershop: { ...rascalConfig.vhosts.flowershop, connection } } };
+  return await promisifyCreateBroker(rascal, rascal.withDefaultConfig(config));
+}
+
+function createMongoConnetionString({host, port, db}, endpointAddress: string) {
+  const address = endpointAddress || `${host}:${port}`;
+  return `mongodb://${address}/${db}`;
+}
+
+function createMongoConnection(mongoConfig) {
+  const endpointAddress = getServiceAddress('localhost:27017')
+  const connectionUri = createMongoConnetionString(mongoConfig, endpointAddress)
+  mongoose.connect(connectionUri);
+}
+
 setTimeout(async function() {
 
-    const broker = await promisifyCreateBroker(rascal, rascal.withDefaultConfig(config.get('rascal')));
+    const broker = await createBroker(config.get('rascal'))
 
     //init database
-    const endpoint = getServiceEndPoint('localhost:27017') || { host: "localhost", port: 27017 }
+    const endpoint = getServiceAddress('localhost:27017')
 
-    console.log('////////////', endpoint)
-    mongoose.connect(`mongodb://${endpoint.host}/flowershop`)
+    createMongoConnection(config.get('mongodb'))
+    
     const db = mongoose.connection;
     const flowers = mongoose.model('flowers', flowerSchema)
     const categories = mongoose.model('categories', categorySchema)
