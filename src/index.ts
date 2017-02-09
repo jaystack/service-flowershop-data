@@ -50,7 +50,7 @@ setTimeout(async function() {
     const broker = await createBroker(config.get('rascal'))
 
     //init database
-    const endpoint = getServiceAddress('localhost:27017')
+    //const endpoint = getServiceAddress('localhost:27017')
 
     createMongoConnection(config.get('mongodb'))
     

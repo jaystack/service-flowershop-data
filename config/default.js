@@ -18,7 +18,7 @@ module.exports = {
           "user": "guest",
           "password": "guest",
           "port": 5672,
-          "vhost": "flowershop",
+          "vhost": "/",
           "options": {
             "heartbeat": 5
           }
