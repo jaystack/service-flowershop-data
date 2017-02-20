@@ -3,7 +3,8 @@ module.exports = {
   "mongodb": {
     "host": "localhost",
     "port": 27017,
-    "db": "flowershop"
+    "db": "flowershop",
+    "uri": "mongodb://localhost:27017/flowershop"
   },
   "systemEndpoints": {
     "host": path.normalize(__dirname + "/../system-endpoints.json"),
