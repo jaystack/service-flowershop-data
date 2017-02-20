@@ -1,6 +1,7 @@
 import * as express from 'express'
 import * as config from 'config'
 import * as logger from 'morgan'
+import * as winston from 'winston'
 import * as mongoose from 'mongoose'
 import { flowerSchema, orderSchema, categorySchema } from './flowershopSchemas'
 import * as bodyParser from 'body-parser'
@@ -8,7 +9,14 @@ import { getServiceAddress } from 'system-endpoints'
 import { stringify } from 'querystring'
 import * as rascal from 'rascal'
 
-function promisifyCreateBroker(rascal: any, rascalConfig: any) {
+type ErrorCallback = (err: Error) => void
+type RascalPublicationCallback = (err: Error, publication: any) => void
+interface RascalBroker {
+    on(event: string, error: ErrorCallback): void
+    publish(publication: string, message: string, callback: RascalPublicationCallback)
+}
+
+function promisifyCreateBroker(rascal: any, rascalConfig: any): Promise<RascalBroker> {
     return new Promise((resolve, reject) => {
         return rascal.createBroker(rascalConfig, {}, (err: Error, broker: any) => {
             if (err) {
@@ -49,11 +57,16 @@ setTimeout(async function() {
 
     const broker = await createBroker(config.get('rascal'))
 
+    broker.on('error', (err) => {
+        //console.error('Broker error', err)
+        showErrorMessageAndExit(err);
+    })
+
     //init database
     //const endpoint = getServiceAddress('localhost:27017')
 
     createMongoConnection(config.get('mongodb'))
-    
+
     const db = mongoose.connection;
     const flowers = mongoose.model('flowers', flowerSchema)
     const categories = mongoose.model('categories', categorySchema)
@@ -118,8 +131,9 @@ setTimeout(async function() {
                     .then(() => publish(broker, <string>config.get('loggerQueueName'), getLogObject(getLogMessage(order))))
                     .then(() => res.sendStatus(201))
                     .catch((err) => {
-                        console.log(err);
                         res.sendStatus(500);
+                        //console.log(err);
+                        showErrorMessageAndExit(err);
                     });
             })
         })
@@ -162,6 +176,13 @@ function publish(broker: any, queueName: string, message: any): Promise<void> {
                 });
         });
     });
+}
+
+function showErrorMessageAndExit(err: Error) {
+    winston.error("Got RabbitMQ error:")
+    winston.error(err)
+    winston.warn('This process must be stopped in order to be able to be restarted by pm2')
+    process.exit(1);
 }
 
 export default {}
