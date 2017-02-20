@@ -180,7 +180,7 @@ function publish(broker: any, queueName: string, message: any): Promise<void> {
 
 function showErrorMessageAndExit(err: Error) {
     winston.error("Got RabbitMQ error:")
-    winston.error(err)
+    winston.error(err.toString())
     winston.warn('This process must be stopped in order to be able to be restarted by pm2')
     process.exit(1);
 }
