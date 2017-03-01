@@ -1,0 +1,19 @@
+{
+  "currentHost": "localhost",
+  "hosts": [
+    {
+      "alias": "dataServer",
+      "endpoint": {
+        "host": "localhost",
+        "port": 3003
+      }
+    },
+    {
+      "alias": "mongodb",
+      "endpoint": {
+        "host": "localhost",
+        "port": 27017
+      }
+    }
+  ]
+}
