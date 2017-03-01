@@ -18,7 +18,7 @@ export default function Router() {
       app.use(bodyParser.json())
       //api
       app.get('/data/categories', (req, res, next) => {
-        console.log(req.protocol + '://' + req.get('host') + req.originalUrl)
+        //console.log(req.protocol + '://' + req.get('host') + req.originalUrl)
         categories.find().toArray()
           .then(arr => arr.map(({_id, Name}) => ({_id, Name})))
           .then(results => results.map(doc => ({...doc, _id: doc._id.toHexString()})))
@@ -29,7 +29,7 @@ export default function Router() {
       })
 
       app.get('/data/flowers/:catName', (req, res, next) => {
-        console.log(req.protocol + '://' + req.get('host') + req.originalUrl, JSON.stringify(req.params))
+        //console.log(req.protocol + '://' + req.get('host') + req.originalUrl, JSON.stringify(req.params))
         flowers.find({ Category: req.params['catName'] }).toArray()
           .then(results => results.map(doc => ({...doc, _id: doc._id.toHexString()})))
           .then(results => {
@@ -39,11 +39,11 @@ export default function Router() {
       })
 
       app.get('/data/flowers', (req, res, next) => {
-        console.log(req.protocol + '://' + req.get('host') + req.originalUrl)
+        //console.log(req.protocol + '://' + req.get('host') + req.originalUrl)
         flowers.find().toArray()
           .then(results => results.map(doc => ({...doc, _id: doc._id.toHexString()})))
           .then(results => {
-            console.log(results.map(doc => JSON.stringify(doc)))
+            //console.log(JSON.stringify(results))
             return results
           })
           .then(results => {
@@ -53,18 +53,19 @@ export default function Router() {
       })
 
       app.get('/data/flower\\(:fId\\)', (req, res) => {
-        console.log(req.protocol + '://' + req.get('host') + req.originalUrl, JSON.stringify(req.params))
+        //console.log(req.protocol + '://' + req.get('host') + req.originalUrl, JSON.stringify(req.params))
         flowers.find({ _id: new ObjectId(req.params['fId']) }).toArray()
           .then(results => results[0])
           .then(result => ({...result, _id: result._id.toHexString()}))
           .then(result => {
+            console.log(`result: ${JSON.stringify(result)}`)
             res.json(result)
           })
           .catch(err => res.sendStatus(500))
       })
 
       app.get('/registration', (req, res, next) => {
-        console.log(req.protocol + '://' + req.get('host') + req.originalUrl)
+        //console.log(req.protocol + '://' + req.get('host') + req.originalUrl)
         categories.find().toArray()
           .then(results => {
             res.json(results)
@@ -73,9 +74,9 @@ export default function Router() {
       })
 
       app.post('/data/order', (req, res) => {
-        console.log(req.protocol + '://' + req.get('host') + req.originalUrl)
+        //console.log(req.protocol + '://' + req.get('host') + req.originalUrl)
         let oIds = JSON.parse(req.body.flowers).map(i => new ObjectId(i))
-        console.log('oids: ', oIds, JSON.parse(req.body.flowers))
+        //console.log('oids: ', oIds, JSON.parse(req.body.flowers))
         flowers.find({ _id: { $in: oIds } }).toArray()
           .then(results => results.map(doc => ({...doc, _id: doc._id.toHexString()})))
           .then(flowers => {
@@ -88,7 +89,7 @@ export default function Router() {
             }
             orders.insertOne(order)
               .then(result => {
-                console.log(`result: ${result}, order: ${JSON.stringify(order)}`)
+                console.log(`result: ${result.constructor}, order: ${JSON.stringify(order)}`)
                 console.log(`result["ok"]: ${result["ok"]}`, `${result}`)
                 //if (result.ok !== 1) return res.sendStatus(500)
                 console.log(`order._id: '${order["_id"]}'`)
