@@ -18,8 +18,10 @@ export default function Router() {
       app.use(bodyParser.json())
       //api
       app.get('/data/categories', (req, res, next) => {
+        console.log(req.protocol + '://' + req.get('host') + req.originalUrl)
         categories.find().toArray()
           .then(arr => arr.map(({_id, Name}) => ({_id, Name})))
+          .then(results => results.map(doc => ({...doc, _id: doc._id.toHexString()})))
           .then(results => {
             res.json(results)
           })
@@ -27,7 +29,9 @@ export default function Router() {
       })
 
       app.get('/data/flowers/:catName', (req, res, next) => {
+        console.log(req.protocol + '://' + req.get('host') + req.originalUrl, JSON.stringify(req.params))
         flowers.find({ Category: req.params['catName'] }).toArray()
+          .then(results => results.map(doc => ({...doc, _id: doc._id.toHexString()})))
           .then(results => {
             res.json(results)
           })
@@ -35,7 +39,13 @@ export default function Router() {
       })
 
       app.get('/data/flowers', (req, res, next) => {
+        console.log(req.protocol + '://' + req.get('host') + req.originalUrl)
         flowers.find().toArray()
+          .then(results => results.map(doc => ({...doc, _id: doc._id.toHexString()})))
+          .then(results => {
+            console.log(results.map(doc => JSON.stringify(doc)))
+            return results
+          })
           .then(results => {
             res.json(results)
           })
@@ -43,14 +53,18 @@ export default function Router() {
       })
 
       app.get('/data/flower\\(:fId\\)', (req, res) => {
-        flowers.find({ _id: req.params['fId'] }).toArray()
-          .then(results => {
-            res.json(results)
+        console.log(req.protocol + '://' + req.get('host') + req.originalUrl, JSON.stringify(req.params))
+        flowers.find({ _id: new ObjectId(req.params['fId']) }).toArray()
+          .then(results => results[0])
+          .then(result => ({...result, _id: result._id.toHexString()}))
+          .then(result => {
+            res.json(result)
           })
           .catch(err => res.sendStatus(500))
       })
 
       app.get('/registration', (req, res, next) => {
+        console.log(req.protocol + '://' + req.get('host') + req.originalUrl)
         categories.find().toArray()
           .then(results => {
             res.json(results)
@@ -59,67 +73,32 @@ export default function Router() {
       })
 
       app.post('/data/order', (req, res) => {
+        console.log(req.protocol + '://' + req.get('host') + req.originalUrl)
         let oIds = JSON.parse(req.body.flowers).map(i => new ObjectId(i))
         console.log('oids: ', oIds, JSON.parse(req.body.flowers))
-        flowers.find({ _id: { $in: JSON.parse(req.body.flowers) } }).toArray()
+        flowers.find({ _id: { $in: oIds } }).toArray()
+          .then(results => results.map(doc => ({...doc, _id: doc._id.toHexString()})))
           .then(flowers => {
-            const order = {
+            let order = {
               CustomerName: req.body.customerName,
               CustomerAddress: req.body.customerAddress,
               EmailAddress: req.body.emailAddress,
               Orders: flowers,
               OrderPrice: (flowers.reduce((a, b) => a + b['Price'], 0)).toFixed(2)
             }
-            return ({result: orders.insert(order), order})
+            orders.insertOne(order)
+              .then(result => {
+                console.log(`result: ${result}, order: ${JSON.stringify(order)}`)
+                console.log(`result["ok"]: ${result["ok"]}`, `${result}`)
+                //if (result.ok !== 1) return res.sendStatus(500)
+                console.log(`order._id: '${order["_id"]}'`)
+                const loggerQueueName = (config.messaging && config.messaging.loggerRequestQueueName) || 'loggerMQ'
+                ch.assertQueue(loggerQueueName)
+                ch.sendToQueue(loggerQueueName, new Buffer(JSON.stringify(getLogObject(getLogMessage(order)))))
+                return res.sendStatus(201)
+              })
+              .catch(err => res.sendStatus(500))
           })
-          .then(({result, order}) =>  {
-            if (result.nInserted !== 1) return res.sendStatus(500)
-            const loggerQueueName = (config.messaging && config.messaging.loggerRequestQueueName) || 'loggerMQ'
-            ch.assertQueue(loggerQueueName)
-            ch.sendToQueue(loggerQueueName, new Buffer(JSON.stringify(getLogObject(getLogMessage(order)))))
-            return res.sendStatus(201)
-            // publish(broker, <string>config.get('queuename'), order)
-            //     .then(() => publish(broker, <string>config.get('loggerQueueName'), getLogObject(getLogMessage(order))))
-            //     .then(() => res.sendStatus(201))
-            //     .catch((err) => {
-            //         res.sendStatus(500);
-            //         //console.log(err);
-            //         showErrorMessageAndExit(err);
-            //     });
-          })
-          .catch(err => res.sendStatus(500))
-      })
-/*
-      app.post('/data/order', (req, res) => {
-        let oIds = JSON.parse(req.body.flowers).map(i => new ObjectId(i))
-        console.log('oids: ', oIds, JSON.parse(req.body.flowers))
-        flowers.find({ _id: { $in: JSON.parse(req.body.flowers) } }, (err, flowers) => {
-          const order = new orders({
-            CustomerName: req.body.customerName,
-            CustomerAddress: req.body.customerAddress,
-            EmailAddress: req.body.emailAddress,
-            Orders: flowers,
-            OrderPrice: (flowers.reduce((a, b) => a + b['Price'], 0)).toFixed(2)
-          })
-          order.save((err, o) => {
-            if (err) res.sendStatus(500)
-            const loggerQueueName = (config.messaging && config.messaging.requestQueueName) || 'loggerQueue'
-            ch.assertQueue(loggerQueueName)
-            ch.sendToQueue(loggerQueueName, new Buffer(JSON.stringify(getLogObject(getLogMessage(order)))))
-            // publish(broker, <string>config.get('queuename'), order)
-            //     .then(() => publish(broker, <string>config.get('loggerQueueName'), getLogObject(getLogMessage(order))))
-            //     .then(() => res.sendStatus(201))
-            //     .catch((err) => {
-            //         res.sendStatus(500);
-            //         //console.log(err);
-            //         showErrorMessageAndExit(err);
-            //     });
-          })
-        })
-      })
-*/
-      app.listen(port, () => {
-        logger.verbose(`service listening on ${host}:${port}`)
       })
     }
   }

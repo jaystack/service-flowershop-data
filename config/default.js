@@ -14,7 +14,8 @@ mkdirp(loggerDir, function (err) {
 // set config options
 module.exports = {
   endpoints: {
-    systemEndpoints: "endpoints.json"
+    systemEndpoints: "endpoints.json",
+    endpoints: "endpoints.json"
   },
   mongodb: {
     db: "flowershop"
