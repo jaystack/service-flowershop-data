@@ -1,7 +1,7 @@
 import 'mocha'
 import * as assert from 'assert'
 
-import System from '../asset/index'
+import System from '../app/index'
 
 describe('System', () => {
   it('starts', (done) => {
