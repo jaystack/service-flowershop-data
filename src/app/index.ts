@@ -6,7 +6,7 @@ import Logger from 'corpjs-logger'
 import { App, Server } from 'corpjs-express'
 import Amqp from 'corpjs-amqp'
 //import MongoDbConfig from './mongoDbConfig'
-import Router from './router'
+import Router from './Router'
 const {name} = require('../../package.json')
 
 const inProductionEnv = process.env.NODE_ENV === 'production'
@@ -30,10 +30,9 @@ export default sys
   .add('rabbitChannel', Amqp.Channel()).dependsOn({ component: 'rabbitConn', as: 'connection' })
   .add('app', App())
   .add('router', Router()).dependsOn('endpoints', 'app', 'logger', 'mongodb', 'config', 'rabbitChannel')
-  .add('server', Server('dataServer')).dependsOn('endpoints', 'app', 'router')
+  .add('server', Server()).dependsOn('endpoints', 'app', 'router')
   .on('componentStart', (componentName: string) => console.log(`Started component: ${componentName}`))
   .on('componentStop', (componentName: string) => console.log(`Stopped component: ${componentName}`))
-  //.on('start', () => console.log(`Started service: ${name}`))
   .on('start', (resources) => {
     resources.logger.verbose(`Started service: ${name}`)
   })
