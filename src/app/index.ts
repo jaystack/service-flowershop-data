@@ -9,10 +9,10 @@ import Amqp from 'corpjs-amqp'
 import Router from './Router'
 const {name} = require('../../package.json')
 
-const inProductionEnv = process.env.NODE_ENV === 'production'
+const inDevelopment = process.env.NODE_ENV === 'dev'
 process.on('unhandledRejection', err => console.error(err))
 
-const sys = new System({ exitOnError: inProductionEnv })
+const sys = new System({ exitOnError: !inDevelopment })
 export function stopSystem() { sys.stop() }
 export function restartSystem() { sys.restart() }
 export default sys
