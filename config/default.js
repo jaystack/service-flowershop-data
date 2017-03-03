@@ -47,8 +47,7 @@ module.exports = {
   rabbit: {
     connection: {
       username: 'guest',
-      password: 'guest',
-      vhost: 'flowershop'
+      password: 'guest'
     }
   },
   messaging: {
