@@ -1,14 +1,58 @@
-var path = require('path')
+const winston = require('winston')
+const path = require('path')
+const mkdirp = require('mkdirp')
+
+// prepare logger folder & filename
+const loggerDir = "./log"
+const loggerFileName = path.join(loggerDir, "all-logs.log")
+// winston logger needs and existing folder
+mkdirp(loggerDir, function (err) {
+    if (err) return console.error(err)
+    return console.log(`Log folder: '${loggerDir}' ('${loggerFileName}')`)
+});
+
+// set config options
 module.exports = {
-  "mongodb": {
-    "host": "localhost",
-    "port": 27017,
-    "db": "flowershop",
-    "uri": "mongodb://localhost:27017/flowershop"
+  endpoints: {
+    _systemEndpoints_: "endpoints.json",
+    endpointsFilePath: "system-endpoints.json"
   },
-  "systemEndpoints": {
-    "host": path.normalize(__dirname + "/../system-endpoints.json"),
-    "sync": true,
+  server: {
+    port: 3003
+  },
+  mongodb: {
+    db: "flowershop"
+  },
+  logger: {
+    transportFactories: [
+      () => new winston.transports.Console({
+        level: "debug",
+        handleExceptions: true,
+        json: false,
+        colorize: true,
+        timestamp: true
+      }),
+      () => new winston.transports.File({
+        level: "info",
+        filename: loggerFileName
+        ,handleExceptions: true
+        ,json: true
+        ,maxsize: 5242880
+        ,maxFiles: 5
+        ,colorize: false
+        ,timestamp: true
+      })
+    ]
+  },
+  rabbit: {
+    connection: {
+      username: 'guest',
+      password: 'guest'
+    }
+  },
+  messaging: {
+    loggerRequestQueueName: 'loggerMQ',
+    sendEmailRequestQueueName: 'sendEmailMQ'
   },
   "rascal": {
     "vhosts": {

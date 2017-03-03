@@ -1,21 +1,31 @@
 {
   "name": "service-flowershop-data",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Data service for Flowershop sample application",
+  "main": "lib/app/index",
+  "typings": "lib/app/index",
   "scripts": {
-    "start": "node server.js",
-    "build": "node_modules/.bin/tsc",
-    "build:w": "node_modules/.bin/tsc -w",
-    "init": "npm run build && node lib/src/initFlowerShop.js",
-    "test": "node_modules/.bin/mocha ./lib/test/*.js",
-    "test_jenkins": "node_modules/.bin/mocha --reporter mocha-junit-reporter ./lib/test/*.js"
+    "build": "rimraf lib/app && tsc -p src/app --outDir lib/app",
+    "build:w": "node_modules/.bin/tsc -w -p src/app --outDir lib/app",
+    "build-tests": "rimraf lib && node_modules/.bin/tsc -p src/test --outDir lib",
+    "build-tests:w": "node_modules/.bin/tsc -p -w src/test --outDir lib",
+    "init": "npm run build && node lib/app/initFlowerShop.js",
+    "pretest": "npm run build-tests",
+    "test": "node_modules/.bin/mocha lib/test/**/*.spec.js -c",
+    "prestart": "npm run build",
+    "start": "node ."
   },
-  "author": "",
-  "license": "ISC",
+  "keywords": [],
   "dependencies": {
-    "body-parser": "^1.15.2",
+    "body-parser": "^1.16.1",
     "config": "^1.21.0",
+    "corpjs-amqp": "latest",
+    "corpjs-config": "latest",
+    "corpjs-endpoints": "latest",
+    "corpjs-express": "latest",
+    "corpjs-logger": "latest",
+    "corpjs-mongodb": "latest",
+    "corpjs-system": "latest",
     "express": "^4.14.0",
     "mongoose": "^4.6.3",
     "morgan": "^1.7.0",
@@ -34,7 +44,8 @@
     "@types/node": "^6.0.46",
     "mocha": "^3.1.2",
     "mocha-junit-reporter": "^1.12.1",
-    "typescript": "2.1.5",
-    "system-endpoints": "~0.0.5"
+    "rimraf": "^2.6.1",
+    "system-endpoints": "~0.0.3",
+    "typescript": "^2.2.1"
   }
 }
