@@ -12,7 +12,6 @@
     "init": "npm run build && node lib/app/initFlowerShop.js",
     "pretest": "npm run build-tests",
     "test": "node_modules/.bin/mocha lib/test/**/*.spec.js -c",
-    "prestart": "npm run build",
     "start": "node ."
   },
   "keywords": [],
