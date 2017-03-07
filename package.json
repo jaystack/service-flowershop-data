@@ -25,6 +25,7 @@
     "corpjs-mongodb": "0.0.5",
     "corpjs-system": "0.0.37",
     "express": "4.14.0",
+    "mongoose": "^4.8.6",
     "morgan": "1.7.0",
     "winston": "2.3.1"
   },
