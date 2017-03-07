@@ -5,5 +5,4 @@ test-results.xml
 test/*.js
 system-endpoints.json
 .vscode
-yarn.lock
 *.log
