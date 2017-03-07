@@ -23,7 +23,7 @@
     "corpjs-express": "0.0.9",
     "corpjs-logger": "0.0.13",
     "corpjs-mongodb": "0.0.5",
-    "corpjs-system": "0.0.36",
+    "corpjs-system": "0.0.37",
     "express": "4.14.0",
     "morgan": "1.7.0",
     "winston": "2.3.1"

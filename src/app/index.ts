@@ -36,5 +36,5 @@ export default sys
   .on('start', (resources) => {
     resources.logger.verbose(`Started service: ${name}`)
   })
-  .on('stop', err => console.log(`Stopped service: ${name}`, err || ''))
+  .on('stop', (err, stopErr) => console.log(`Stopped service: ${name}`, err || '', stopErr || ''))
   .start()
