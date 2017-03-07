@@ -21,7 +21,9 @@ module.exports = {
     port: 3003
   },
   mongodb: {
-    db: "flowershop"
+    db: "flowershop",
+    _uri_: "Needed by `npm run init`",
+    uri: "mongodb://localhost/flowershop"
   },
   logger: {
     transportFactories: [
