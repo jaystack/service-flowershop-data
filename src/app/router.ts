@@ -7,7 +7,7 @@ const ObjectId = require('mongodb').ObjectId
 export default function Router() {
   return {
     async start({ endpoints, app, logger, mongodb: db, config, requestChannel: ch }) {
-      const { host, port } = endpoints.getServiceEndpoint('dataServer')
+      //const { host, port } = endpoints.getServiceEndpoint('dataServer')
 
       const categoriesCollection = db.collection('categories')
       const flowersCollection = db.collection('flowers')
@@ -21,7 +21,7 @@ export default function Router() {
       app.get('/data/categories', (req, res, next) => {
         //console.log(req.protocol + '://' + req.get('host') + req.originalUrl)
         categoriesCollection.find().toArray()
-          .then(arr => arr.map(({ _id, Name }) => ({ _id, Name })))
+          .then(arr => arr.map(doc => ({ ...doc, __v: undefined })))
           .then(results => results.map(doc => ({ ...doc, _id: doc._id.toHexString() })))
           .then(results => {
             res.json(results)
@@ -32,6 +32,7 @@ export default function Router() {
       app.get('/data/flowers/:catName', (req, res, next) => {
         //console.log(req.protocol + '://' + req.get('host') + req.originalUrl, JSON.stringify(req.params))
         flowersCollection.find({ Category: req.params['catName'] }).toArray()
+          .then(arr => arr.map(doc => ({ ...doc, __v: undefined })))
           .then(results => results.map(doc => ({ ...doc, _id: doc._id.toHexString() })))
           .then(results => {
             res.json(results)
@@ -42,6 +43,7 @@ export default function Router() {
       app.get('/data/flowers', (req, res, next) => {
         //console.log(req.protocol + '://' + req.get('host') + req.originalUrl)
         flowersCollection.find().toArray()
+          .then(arr => arr.map(doc => ({ ...doc, __v: undefined })))
           .then(results => results.map(doc => ({ ...doc, _id: doc._id.toHexString() })))
           .then(results => {
             //console.log(JSON.stringify(results))
@@ -56,6 +58,7 @@ export default function Router() {
       app.get('/data/flower\\(:fId\\)', (req, res) => {
         //console.log(req.protocol + '://' + req.get('host') + req.originalUrl, JSON.stringify(req.params))
         flowersCollection.find({ _id: new ObjectId(req.params['fId']) }).toArray()
+          .then(arr => arr.map(doc => ({ ...doc, __v: undefined })))
           .then(results => results[0])
           .then(result => ({ ...result, _id: result._id.toHexString() }))
           .then(result => {
