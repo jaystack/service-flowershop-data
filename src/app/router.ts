@@ -62,7 +62,7 @@ export default function Router() {
           .then(results => results[0])
           .then(result => ({ ...result, _id: result._id.toHexString() }))
           .then(result => {
-            console.log(`result: ${JSON.stringify(result)}`)
+            //console.log(`result: ${JSON.stringify(result)}`)
             res.json(result)
           })
           .catch(err => res.sendStatus(500))
