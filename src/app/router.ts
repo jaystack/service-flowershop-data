@@ -62,21 +62,21 @@ export default function Router() {
           .then(results => results[0])
           .then(result => ({ ...result, _id: result._id.toHexString() }))
           .then(result => {
-            console.log(`result: ${JSON.stringify(result)}`)
+            //console.log(`result: ${JSON.stringify(result)}`)
             res.json(result)
           })
           .catch(err => res.sendStatus(500))
       })
 
       app.post('/data/user', async (req, res) => {
-        console.log(req.protocol + '://' + req.get('host') + req.originalUrl)
+        //console.log(req.protocol + '://' + req.get('host') + req.originalUrl)
         const user = {
           userName: req.body.userName,
           password: req.body.password,
           email: req.body.email
         }
         const result = await usersCollection.insertOne(user)
-        console.log(`result: ${result}, user: ${JSON.stringify(user)}`)
+        //console.log(`result: ${result}, user: ${JSON.stringify(user)}`)
         const loggerQueueName = (config.messaging && config.messaging.loggerRequestQueueName) || 'loggerMQ'
         try {
           await ch.assertQueue(loggerQueueName)
@@ -88,7 +88,7 @@ export default function Router() {
       })
 
       app.post('/data/order', async (req, res) => {
-        console.log(req.protocol + '://' + req.get('host') + req.originalUrl)
+        //console.log(req.protocol + '://' + req.get('host') + req.originalUrl)
         let oIds = JSON.parse(req.body.flowers).map(i => new ObjectId(i))
         //console.log('oids: ', oIds, JSON.parse(req.body.flowers))
         const results = await flowersCollection.find({ _id: { $in: oIds } }).toArray()
@@ -101,10 +101,7 @@ export default function Router() {
           OrderPrice: (flowers.reduce((a, b) => a + b['Price'], 0)).toFixed(2)
         }
         const result = await ordersCollection.insertOne(order)
-        console.log(`result: ${result}, order: ${JSON.stringify(order)}`)
-        //console.log(`result["ok"]: ${result["ok"]}`, `${result}`)
-        //if (result.ok !== 1) return res.sendStatus(500)
-        //console.log(`order._id: '${order["_id"]}'`)
+        //console.log(`result: ${result}, order: ${JSON.stringify(order)}`)
         const loggerQueueName = (config.messaging && config.messaging.loggerRequestQueueName) || 'loggerMQ'
         try {
           await ch.assertQueue(loggerQueueName)
