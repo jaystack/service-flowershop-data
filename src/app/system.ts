@@ -30,6 +30,7 @@ export default new System()
   .on('componentStart', (componentName: string) => console.log(`Started component: ${componentName}`))
   .on('componentStop', (componentName: string) => console.log(`Stopped component: ${componentName}`))
   .on('start', (resources) => {
+    console.log(`Started service: ${name}`)
     resources.logger.verbose(`Started service: ${name}`)
   })
   .on('stop', (err, stopErr) => console.log(`Stopped service: ${name}`, err || '', stopErr || ''))
