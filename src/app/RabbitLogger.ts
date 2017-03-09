@@ -2,12 +2,13 @@ export default function RabbitLogger() {
   return {
     async start({ config, rabbitChannel: channel, logger }) {
       return {
-        log: function log(logMessage: string) {
+        log: async function log(logMessage: string) {
           const loggerQueueName = (config.messaging && config.messaging.loggerRequestQueueName) || 'loggerMQ'
           const logObject = getLogObject(logMessage)
-          channel.assertQueue(loggerQueueName)
-            .then(_ => channel.sendToQueue(loggerQueueName, new Buffer(JSON.stringify(logObject))))
-            .catch(err => logger.warn('RabbitMQ error: ' + err.toString()))
+          if (channel) {
+            await channel.assertQueue(loggerQueueName)
+            await channel.sendToQueue(loggerQueueName, new Buffer(JSON.stringify(logObject)))
+          }
         }
       }
     }
