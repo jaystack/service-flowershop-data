@@ -15,10 +15,10 @@ export default function RabbitLogger() {
   }
 }
 
-function getLogObject(message: string, logLevel: string = 'info') {
+function getLogObject(message: string, logLevel: string = 'info', timestamp: Date = new Date()) {
   return {
     message,
     logLevel,
-    timestamp: (new Date()).toISOString()
+    timestamp: timestamp.toISOString()
   }
 }
