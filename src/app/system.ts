@@ -6,7 +6,8 @@ import Logger from 'corpjs-logger'
 import { App, Server } from 'corpjs-express'
 import Amqp from 'corpjs-amqp'
 //import MongoDbConfig from './mongoDbConfig'
-import Router from './router'
+import Router from './Router'
+import RabbitLogger from './RabbitLogger'
 const {name} = require('../../package.json')
 
 process.on('unhandledRejection', err => console.error(err))
@@ -22,10 +23,11 @@ export default new System()
   //.add('mongodb', MongoDb()).dependsOn('mongoDbConfig')
   .add('mongodb', MongoDb()).dependsOn('endpoints', { component: 'config', source: 'mongodb', as: 'config' })
   .add('logger', Logger()).dependsOn({ component: 'config', source: 'logger', as: 'config' })
-  .add('rabbitConn', Amqp.Connection()).dependsOn({ component: 'config', source: 'rabbit', as: 'config' }, 'endpoints')
-  .add('rabbitChannel', Amqp.Channel()).dependsOn({ component: 'rabbitConn', as: 'connection' })
+  .add('rabbitConn', Amqp.Connection({ mandatory: false })).dependsOn({ component: 'config', source: 'rabbit', as: 'config' }, 'endpoints')
+  .add('rabbitChannel', Amqp.Channel({ mandatory: false })).dependsOn({ component: 'rabbitConn', as: 'connection' })
+  .add('rabbitLogger', RabbitLogger()).dependsOn('config', 'rabbitChannel', 'logger')
   .add('app', App())
-  .add('router', Router()).dependsOn('endpoints', 'app', 'logger', 'mongodb', 'config', 'rabbitChannel')
+  .add('router', Router()).dependsOn('endpoints', 'app', 'logger', 'mongodb', 'config', 'rabbitLogger')
   .add('server', Server()).dependsOn('endpoints', 'app', 'router', { component: 'config', source: 'server', as: 'config' })
   .on('componentStart', (componentName: string) => console.log(`Started component: ${componentName}`))
   .on('componentStop', (componentName: string) => console.log(`Stopped component: ${componentName}`))
@@ -33,4 +35,7 @@ export default new System()
     console.log(`Started service: ${name}`)
     resources.logger.verbose(`Started service: ${name}`)
   })
-  .on('stop', (err, stopErr) => console.log(`Stopped service: ${name}`, err || '', stopErr || ''))
+  .on('stop', (err, stopErr) => {
+    console.log(`Stopped service: ${name}`, err || '', stopErr || '')
+    console.log((new Date()).toISOString() + ' Stopping finished.')
+  })

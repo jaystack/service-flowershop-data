@@ -3,11 +3,10 @@ import bodyParser = require('body-parser')
 import { static as expressStatic } from 'express'
 import path = require('path')
 const ObjectId = require('mongodb').ObjectId
-import logToMQ from './logToMQ'
 
 export default function Router() {
   return {
-    async start({ endpoints, app, logger, mongodb: db, config, rabbitChannel: ch }) {
+    async start({ endpoints, app, logger, mongodb: db, config, rabbitLogger }) {
       //const { host, port } = endpoints.getServiceEndpoint('dataServer')
 
       const categoriesCollection = db.collection('categories')
@@ -78,7 +77,7 @@ export default function Router() {
         }
         const result = await usersCollection.insertOne(user)
         //console.log(`result: ${result}, user: ${JSON.stringify(user)}`)
-        await logToMQ(ch, config, logger, getUserLogMessage(user))
+        rabbitLogger.log(getUserLogMessage(user))
         return res.sendStatus(201)
       })
 
@@ -93,11 +92,12 @@ export default function Router() {
           CustomerAddress: req.body.customerAddress,
           EmailAddress: req.body.emailAddress,
           Orders: flowers,
-          OrderPrice: (flowers.reduce((a, b) => a + b['Price'], 0)).toFixed(2)
+          OrderPrice: (flowers.reduce((a, b) => a + b['Price'], 0)).toFixed(2),
+          TimeStamp: new Date()
         }
         const result = await ordersCollection.insertOne(order)
         //console.log(`result: ${result}, order: ${JSON.stringify(order)}`)
-        await logToMQ(ch, config, logger, getOrderLogMessage(order))
+        rabbitLogger.log(getOrderLogMessage(order))
         return res.sendStatus(201)
       })
     }
