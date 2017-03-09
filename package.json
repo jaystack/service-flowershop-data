@@ -17,7 +17,7 @@
   "keywords": [],
   "dependencies": {
     "body-parser": "1.17.0",
-    "corpjs-amqp": "0.0.6",
+    "corpjs-amqp": "0.0.10",
     "corpjs-config": "0.0.11",
     "corpjs-endpoints": "0.0.13",
     "corpjs-express": "0.0.9",
