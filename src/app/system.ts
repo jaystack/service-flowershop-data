@@ -9,10 +9,9 @@ import Amqp from 'corpjs-amqp'
 import Router from './router'
 const {name} = require('../../package.json')
 
-const inDevEnv = process.env.NODE_ENV === 'dev'
 process.on('unhandledRejection', err => console.error(err))
 
-export default new System({ exitOnError: inDevEnv })
+export default new System()
   .add('config', new Config()
     .add(config => loaders.require({ path: './config/default.js', mandatory: true }))
     .add(config => loaders.require({ path: './config/dev.js', mandatory: false }))
