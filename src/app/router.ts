@@ -3,10 +3,11 @@ import bodyParser = require('body-parser')
 import { static as expressStatic } from 'express'
 import path = require('path')
 const ObjectId = require('mongodb').ObjectId
+import logToMQ from './logToMQ'
 
 export default function Router() {
   return {
-    async start({ endpoints, app, logger, mongodb: db, config, requestChannel: ch }) {
+    async start({ endpoints, app, logger, mongodb: db, config, rabbitChannel: ch }) {
       //const { host, port } = endpoints.getServiceEndpoint('dataServer')
 
       const categoriesCollection = db.collection('categories')
@@ -77,13 +78,7 @@ export default function Router() {
         }
         const result = await usersCollection.insertOne(user)
         //console.log(`result: ${result}, user: ${JSON.stringify(user)}`)
-        const loggerQueueName = (config.messaging && config.messaging.loggerRequestQueueName) || 'loggerMQ'
-        try {
-          await ch.assertQueue(loggerQueueName)
-          await ch.sendToQueue(loggerQueueName, new Buffer(JSON.stringify(getLogObject(getLogMessage(user)))))
-        } catch(err) {
-          logger.warn('RabbitMQ error: ' + err.message + err.stack)
-        }
+        await logToMQ(ch, config, logger, getUserLogMessage(user))
         return res.sendStatus(201)
       })
 
@@ -102,27 +97,19 @@ export default function Router() {
         }
         const result = await ordersCollection.insertOne(order)
         //console.log(`result: ${result}, order: ${JSON.stringify(order)}`)
-        const loggerQueueName = (config.messaging && config.messaging.loggerRequestQueueName) || 'loggerMQ'
-        try {
-          await ch.assertQueue(loggerQueueName)
-          await ch.sendToQueue(loggerQueueName, new Buffer(JSON.stringify(getLogObject(getLogMessage(order)))))
-        } catch(err) {
-          logger.warn('RabbitMQ error: ' + err.message + err.stack)
-        }
+        await logToMQ(ch, config, logger, getOrderLogMessage(order))
         return res.sendStatus(201)
       })
     }
   }
 }
 
-function getLogMessage(order: any): string {
+function getOrderLogMessage(order: any): string {
   return `Successful order!
 Ordered items: ${order.Orders.map(item => item.Name).join(', ')}`;
 }
 
-function getLogObject(message: string, logLevel: string = 'info') {
-  return {
-    message,
-    logLevel
-  }
+function getUserLogMessage(user: any): string {
+  return `Successful user registration!
+User: ${user.userName}, ${user.email}`;
 }
