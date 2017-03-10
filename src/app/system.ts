@@ -6,7 +6,7 @@ import Logger from 'corpjs-logger'
 import { App, Server } from 'corpjs-express'
 import Amqp from 'corpjs-amqp'
 //import MongoDbConfig from './mongoDbConfig'
-import Router from './Router'
+import Router from './router'
 import RabbitLogger from './RabbitLogger'
 const {name} = require('../../package.json')
 
