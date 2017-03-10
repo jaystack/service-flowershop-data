@@ -83,7 +83,7 @@ export default function Router() {
 
       app.post('/data/order', async (req, res) => {
         //console.log(req.protocol + '://' + req.get('host') + req.originalUrl)
-        let oIds = JSON.parse(req.body.flowers).map(i => new ObjectId(i))
+        let oIds = req.body.flowers.map(i => new ObjectId(i))
         //console.log('oids: ', oIds, JSON.parse(req.body.flowers))
         const results = await flowersCollection.find({ _id: { $in: oIds } }).toArray()
         const flowers = await results.map(doc => ({ ...doc, _id: doc._id.toHexString() }))
