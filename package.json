@@ -20,10 +20,10 @@
     "corpjs-amqp": "0.0.12",
     "corpjs-config": "0.0.11",
     "corpjs-endpoints": "0.0.13",
-    "corpjs-express": "0.0.9",
+    "corpjs-express": "0.0.12",
     "corpjs-logger": "0.0.13",
-    "corpjs-mongodb": "0.0.11",
-    "corpjs-system": "0.0.42",
+    "corpjs-mongodb": "0.0.5",
+    "corpjs-system": "0.0.46",
     "express": "4.14.0",
     "morgan": "1.7.0",
     "winston": "2.3.1"
