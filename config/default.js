@@ -14,7 +14,6 @@ mkdirp(loggerDir, function (err) {
 // set config options
 module.exports = {
   endpoints: {
-    _systemEndpoints_: "endpoints.json",
     endpointsFilePath: "system-endpoints.json"
   },
   server: {
@@ -53,51 +52,5 @@ module.exports = {
   messaging: {
     loggerRequestQueueName: 'loggerMQ',
     sendEmailRequestQueueName: 'sendEmailMQ'
-  },
-  "rascal": {
-    "vhosts": {
-      "flowershop": {
-        "connection": {
-          "protocol": "amqp",
-          "hostname": "localhost",
-          "user": "guest",
-          "password": "guest",
-          "port": 5672,
-          "vhost": "/",
-          "options": {
-            "heartbeat": 5
-          }
-        },
-        "queues": {
-          "sendEmailMQ": {
-            "options": {
-              "arguments": {
-                "x-message-ttl": 60000,
-                "x-max-length": 5000
-              }
-            }
-          },
-          "loggerMQ": {
-            "options": {
-              "arguments": {
-                "x-message-ttl": 60000,
-                "x-max-length": 5000
-              }
-            }
-          }
-        },
-        "publications": {
-          "sendEmailMQ": {
-            "queue": "sendEmailMQ"
-          },
-          "loggerMQ": {
-            "queue": "loggerMQ"
-          }
-        }
-      }
-    }
-  },
-  "defer": 1000,
-  "queuename": "sendEmailMQ",
-  "loggerQueueName": "loggerMQ"
+  }
 }

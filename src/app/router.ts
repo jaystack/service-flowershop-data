@@ -6,7 +6,7 @@ const ObjectId = require('mongodb').ObjectId
 
 export default function Router() {
   return {
-    async start({ endpoints, app, logger, mongodb: db, config, requestChannel: ch }) {
+    async start({ endpoints, app, logger, mongodb: db, config, rabbitLogger }) {
       //const { host, port } = endpoints.getServiceEndpoint('dataServer')
 
       const categoriesCollection = db.collection('categories')
@@ -69,28 +69,23 @@ export default function Router() {
       })
 
       app.post('/data/user', async (req, res) => {
-        console.log(req.protocol + '://' + req.get('host') + req.originalUrl)
+        //console.log(req.protocol + '://' + req.get('host') + req.originalUrl)
         const user = {
           userName: req.body.userName,
           password: req.body.password,
           email: req.body.email
         }
         const result = await usersCollection.insertOne(user)
-        console.log(`result: ${result}, user: ${JSON.stringify(user)}`)
-        const loggerQueueName = (config.messaging && config.messaging.loggerRequestQueueName) || 'loggerMQ'
-        try {
-          await ch.assertQueue(loggerQueueName)
-          await ch.sendToQueue(loggerQueueName, new Buffer(JSON.stringify(getLogObject(getLogMessage(user)))))
-        } catch(err) {
-          logger.warn('RabbitMQ error: ' + err.message + err.stack)
-        }
+        //console.log(`result: ${result}, user: ${JSON.stringify(user)}`)
+        rabbitLogger.log(getUserLogMessage(user))
         return res.sendStatus(201)
       })
 
       app.post('/data/order', async (req, res) => {
-        console.log(req.protocol + '://' + req.get('host') + req.originalUrl)
-        let oIds = JSON.parse(req.body.flowers).map(i => new ObjectId(i))
-        //console.log('oids: ', oIds, JSON.parse(req.body.flowers))
+        //console.log(req.protocol + '://' + req.get('host') + req.originalUrl)
+        let flowersIn = (req.body.flowers && JSON.parse( req.body.flowers)) || []
+        let oIds = flowersIn.map(i => new ObjectId(i))
+        //console.log('oids: ', oIds, JSON.stringify(flowersIn))
         const results = await flowersCollection.find({ _id: { $in: oIds } }).toArray()
         const flowers = await results.map(doc => ({ ...doc, _id: doc._id.toHexString() }))
         const order = {
@@ -98,34 +93,24 @@ export default function Router() {
           CustomerAddress: req.body.customerAddress,
           EmailAddress: req.body.emailAddress,
           Orders: flowers,
-          OrderPrice: (flowers.reduce((a, b) => a + b['Price'], 0)).toFixed(2)
+          OrderPrice: (flowers.reduce((a, b) => a + b['Price'], 0)).toFixed(2),
+          TimeStamp: new Date()
         }
         const result = await ordersCollection.insertOne(order)
-        console.log(`result: ${result}, order: ${JSON.stringify(order)}`)
-        //console.log(`result["ok"]: ${result["ok"]}`, `${result}`)
-        //if (result.ok !== 1) return res.sendStatus(500)
-        //console.log(`order._id: '${order["_id"]}'`)
-        const loggerQueueName = (config.messaging && config.messaging.loggerRequestQueueName) || 'loggerMQ'
-        try {
-          await ch.assertQueue(loggerQueueName)
-          await ch.sendToQueue(loggerQueueName, new Buffer(JSON.stringify(getLogObject(getLogMessage(order)))))
-        } catch(err) {
-          logger.warn('RabbitMQ error: ' + err.message + err.stack)
-        }
+        //console.log(`result: ${result}, order: ${JSON.stringify(order)}`)
+        rabbitLogger.log(getOrderLogMessage(order))
         return res.sendStatus(201)
       })
     }
   }
 }
 
-function getLogMessage(order: any): string {
+function getOrderLogMessage(order: any): string {
   return `Successful order!
 Ordered items: ${order.Orders.map(item => item.Name).join(', ')}`;
 }
 
-function getLogObject(message: string, logLevel: string = 'info') {
-  return {
-    message,
-    logLevel
-  }
+function getUserLogMessage(user: any): string {
+  return `Successful user registration!
+User: ${user.userName}, ${user.email}`;
 }
