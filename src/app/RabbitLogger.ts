@@ -6,8 +6,12 @@ export default function RabbitLogger() {
           const loggerQueueName = (config.messaging && config.messaging.loggerRequestQueueName) || 'loggerMQ'
           const logObject = getLogObject(logMessage)
           if (channel) {
-            await channel.assertQueue(loggerQueueName)
-            await channel.sendToQueue(loggerQueueName, new Buffer(JSON.stringify(logObject)))
+            try {
+              await channel.assertQueue(loggerQueueName)
+              await channel.sendToQueue(loggerQueueName, new Buffer(JSON.stringify(logObject)))
+            } catch (err) {
+              logger.warn(err) // system shouldn't stop if rabbitmq is down
+            }
           }
         }
       }
