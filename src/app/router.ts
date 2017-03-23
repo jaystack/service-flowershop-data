@@ -20,8 +20,13 @@ export default function Router() {
       //api
       app.get('/data/categories', (req, res, next) => {
         //console.log(req.protocol + '://' + req.get('host') + req.originalUrl)
-        categoriesCollection.find().toArray()
+        categoriesCollection.find().sort({ DisplayName: 1 }).toArray()
           .then(arr => arr.map(doc => ({ ...doc, __v: undefined })))
+          .then(results => {
+            const lastItems = results.filter(item => item.Name === "other" || item.Name === "cats")
+            const sortItems = results.filter(item => item.Name !== "other" && item.Name !== "cats")
+            return [...sortItems, ...lastItems]
+          })
           .then(results => results.map(doc => ({ ...doc, _id: doc._id.toHexString() })))
           .then(results => {
             res.json(results)
@@ -31,7 +36,7 @@ export default function Router() {
 
       app.get('/data/flowers/:catName', (req, res, next) => {
         //console.log(req.protocol + '://' + req.get('host') + req.originalUrl, JSON.stringify(req.params))
-        flowersCollection.find({ Category: req.params['catName'] }).toArray()
+        flowersCollection.find({ Category: req.params['catName'] }).sort({ Name: 1 }).toArray()
           .then(arr => arr.map(doc => ({ ...doc, __v: undefined })))
           .then(results => results.map(doc => ({ ...doc, _id: doc._id.toHexString() })))
           .then(results => {
@@ -42,7 +47,7 @@ export default function Router() {
 
       app.get('/data/flowers', (req, res, next) => {
         //console.log(req.protocol + '://' + req.get('host') + req.originalUrl)
-        flowersCollection.find().toArray()
+        flowersCollection.find().sort({ Name: 1 }).toArray()
           .then(arr => arr.map(doc => ({ ...doc, __v: undefined })))
           .then(results => results.map(doc => ({ ...doc, _id: doc._id.toHexString() })))
           .then(results => {
